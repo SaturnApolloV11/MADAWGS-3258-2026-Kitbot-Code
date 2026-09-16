@@ -1,0 +1,125 @@
+AUTONOMOUS + LIMELIGHT OVERVIEW
+================================
+
+This project currently uses three autonomous options in SmartDashboard ("Auto Mode"):
+
+1) Two Cycle Neutral (Timed) [default]
+2) PathPlanner TopLeftTwoCycle
+3) Preload + Mobility (Timed)
+
+The old legacy "ExampleAuto" option has been removed from the chooser and code.
+
+
+AUTONOMOUS DETAILS
+==================
+
+Two Cycle Neutral (Timed)
+-------------------------
+Command: NeutralZoneCycleAuto
+
+High-level sequence:
+1) Spin up launcher (stage "1-FirstSpinUp")
+2) Launch preload (stage "2-FirstLaunch")
+3) Drive to neutral zone while intaking (stage "3-DriveToNeutral+Intake")
+4) Keep intaking briefly to secure game piece (stage "4-NeutralPickup")
+5) Return toward shooting area while intaking (stage "5-Return+Intake")
+6) Spin up launcher again (stage "6-SecondSpinUp")
+7) Launch second game piece (stage "7-SecondLaunch")
+8) Mark done (stage "Complete")
+
+Timing/speeds are read from SmartDashboard keys under Auto/* at command creation time.
+Small settle waits are inserted between major stages to reduce transitions.
+
+
+Preload + Mobility (Timed)
+--------------------------
+Command: PreloadMobilityAuto
+
+Sequence:
+1) Spin up launcher
+2) Launch preload
+3) Drive backward for mobility
+
+Uses SmartDashboard Auto/* tunables for spin-up, launch time, drive speed, and drive time.
+
+
+PathPlanner TopLeftTwoCycle
+---------------------------
+Built with AutoBuilder from PathPlanner.
+Named commands registered in RobotContainer:
+- FirstShoot: SpinUp then Launch
+- SecondShoot: SpinUp then Launch
+- IntakeOn: applies intake + feeder voltages
+- IntakeOff: stops fuel subsystem
+
+These allow your path file markers/events to trigger shooter and intake behavior.
+
+
+LIMELIGHT SYSTEM DETAILS
+========================
+
+Subsystem: LimelightSubsystem
+-----------------------------
+Reads data from NetworkTables table:
+- Vision/TableName (default "limelight")
+
+Entries used:
+- tv: target valid
+- tx: horizontal offset (deg)
+- ty: vertical offset (deg)
+- ta: target area
+- tid: AprilTag ID
+
+Published to SmartDashboard each periodic cycle:
+- Vision/HasTarget
+- Vision/HasHubTagTarget
+- Vision/TxDeg
+- Vision/TyDeg
+- Vision/TargetArea
+- Vision/TagId
+- Vision/RecommendedLaunchVolts
+
+Published at startup for tuning/config:
+- Vision/HubTagId (default 7)
+
+Recommended shooter voltage:
+- Formula: (LaunchTySlope * ty) + LaunchTyIntercept
+- Clamped between Vision/LaunchVoltsMin and Vision/LaunchVoltsMax
+- Constants are initially published from Constants.VisionConstants, but tunable on dashboard.
+
+
+Driver Aim Assist
+-----------------
+Command: DriveAimAssist (held on driver left bumper)
+
+Behavior:
+- Driver still controls forward/reverse using left stick Y.
+- Rotation normally comes from right stick X.
+- If Limelight sees the configured hub tag ID, rotation is replaced by a proportional tx correction:
+  rotation = clamp(-tx * AimTxKp, +/- AimRotationMax)
+- If |tx| is within AimTxDeadbandDeg, rotation command is set to 0.
+
+This lets the robot auto-turn toward target while the driver controls approach speed.
+
+
+Auto-adjusted Launch Voltage
+----------------------------
+Command: Launch
+
+Behavior:
+- Reads normal launcher voltage from "Launching launcher roller value".
+- If Vision/AutoLaunchAdjustEnabled is true, and the configured hub tag is visible, Launch uses
+  LimelightSubsystem.getRecommendedLaunchVoltage() instead.
+- Feeder voltage still comes from "Launching feeder roller value".
+
+This means launch speed can automatically shift by measured target angle (ty) while still
+allowing dashboard override/tuning.
+
+
+STREAMING
+=========
+
+RobotContainer attempts to add Limelight stream camera:
+- URL default: http://limelight.local:5800/stream.mjpg
+- Added through CameraServer as "Limelight"
+- Wrapped in try/catch so robot code still runs if stream is unavailable.

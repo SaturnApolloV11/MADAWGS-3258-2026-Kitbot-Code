@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TopStart_ToShoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "FirstShoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Shoot_ToNeutralBox"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NeutralBox_ToShoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SecondShoot"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

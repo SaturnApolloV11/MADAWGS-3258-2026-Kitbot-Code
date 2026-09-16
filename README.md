@@ -2,4 +2,7 @@
 
 2026 Madawgs code for the kitbot.
 
-Based on the WPILib 2026 Kitbot template. See [WPILib-License.md](WPILib-License.md) for the included license.
+- [2026KitBotClasses](2026KitBotClasses/)
+- [2026KitBotInline](2026KitBotInline/)
+
+Each folder is a separate WPILib project and includes its original WPILib license.
